@@ -66,16 +66,7 @@ class CausalConv2d(nn.Conv2d):
 
 class TemporalConvLayer(nn.Module):
 
-    # Temporal Convolution Layer (GLU)
-    #
-    #        |--------------------------------| * residual connection *
-    #        |                                |
-    #        |    |--->--- casualconv2d ----- + -------|
-    # -------|----|                                   ⊙ ------>
-    #             |--->--- casualconv2d --- sigmoid ---|
-    #
 
-    # param x: tensor, [bs, c_in, ts, n_vertex]
 
     def __init__(self, Kt, c_in, c_out, n_vertex, act_func):
         super(TemporalConvLayer, self).__init__()
@@ -103,15 +94,7 @@ class TemporalConvLayer(nn.Module):
             x_q = x_causal_conv[:, -self.c_out:, :, :]
 
             if self.act_func == 'glu':
-                # Explanation of Gated Linear Units (GLU):
-                # The concept of GLU was first introduced in the paper
-                # "Language Modeling with Gated Convolutional Networks".
-                # URL: https://arxiv.org/abs/1612.08083
-                # In the GLU operation, the input tensor X is divided into two tensors, X_a and X_b,
-                # along a specific dimension.
-                # In PyTorch, GLU is computed as the element-wise multiplication of X_a and sigmoid(X_b).
-                # More information can be found here: https://pytorch.org/docs/master/nn.functional.html#torch.nn.functional.glu
-                # The provided code snippet, (x_p + x_in) ⊙ sigmoid(x_q), is an example of GLU operation.
+
                 x = torch.mul((x_p + x_in), torch.sigmoid(x_q))
 
             else:
@@ -132,11 +115,6 @@ class TemporalConvLayer(nn.Module):
 
 
 class OutputBlock(nn.Module):
-    # Output block contains 'TNFF' structure
-    # T: Gated Temporal Convolution Layer (GLU or GTU)
-    # N: Layer Normolization
-    # F: Fully-Connected Layer
-    # F: Fully-Connected Layer
 
     def __init__(self, Ko, last_block_channel, channels, end_channel, n_vertex, act_func, bias, droprate):
         super(OutputBlock, self).__init__()
